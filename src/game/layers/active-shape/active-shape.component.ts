@@ -19,6 +19,8 @@ import { PickComponentType } from '../../interfaces/components';
 import { isDefined } from '../../utils/filter-defined';
 import { ResizeService } from '../../services/resize.service';
 import { tap } from 'rxjs';
+import { GameFacade } from '../../game.facade';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'game-active-shape',
@@ -26,29 +28,29 @@ import { tap } from 'rxjs';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div style='position:absolute; background-color: darkblue; opacity: 0.8; color: white; width: 200px; top: 100px'>
-      <pre>{{activeShapes() | json}}</pre>
+    <div
+      style="position:absolute; background-color: darkblue; opacity: 0.8; color: white; width: 200px; top: 100px">
+      <pre>{{ activeShapes() | json }}</pre>
     </div>
     <!-- <div style='position:absolute; background-color: red; opacity: 0.8; color: white; width: 100vw; top: 0px; height: 348.875px'>    
     </div> -->
     <canvas #myCanvas></canvas>
     <img
       #myImg
-      src="https://github.com/petrkgn/katamino-game-angular/blob/main/wshape.png?raw=true"
-    />
+      src="https://github.com/petrkgn/katamino-game-angular/blob/main/wshape.png?raw=true" />
   `,
   styles: `
- img {
-   position: absolute;
-   top: -100%;
- }  
+  img {
+    position: absolute;
+    top: -100%;
+  }  
 `,
 })
 export class ActiveShapeComponent implements AfterViewInit {
-  activeShapes: InputSignal<Entity[] | null> = input.required();
-
   private readonly resizeService = inject(ResizeService);
   private readonly window = inject(WINDOW);
+  private readonly gameFacade = inject(GameFacade);
+
   private canvas!: HTMLCanvasElement;
   private ctx!: CanvasRenderingContext2D | null;
   private imgWidth = 96;
@@ -58,6 +60,10 @@ export class ActiveShapeComponent implements AfterViewInit {
   private readonly _canvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('myImg', { static: true })
   private readonly img!: ElementRef;
+
+  activeShapes = toSignal(this.gameFacade.selectActiveShape(), {
+    initialValue: [],
+  });
 
   constructor() {
     effect((): any => {

@@ -19,6 +19,8 @@ import { PickComponentType } from '../../interfaces/components';
 import { isDefined } from '../../utils/filter-defined';
 import { ResizeService } from '../../services/resize.service';
 import { tap } from 'rxjs';
+import { GameFacade } from '../../game.facade';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'game-placement-shapes',
@@ -26,16 +28,18 @@ import { tap } from 'rxjs';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div style='position:absolute; background-color: darkblue; opacity: 0.8; color: white; width: 200px; top: 300px'>
+    <div
+      style="position:absolute; background-color: darkblue; opacity: 0.8; color: white; width: 200px; top: 300px">
       <!-- <pre>{{activeShapes() | json}}</pre> -->
     </div>
     <div class="canvas-container">
-    <canvas #myCanvas></canvas>
-    <div>
-    <img
-      #myImg
-      src="https://github.com/petrkgn/katamino-game-angular/blob/main/wshape.png?raw=true"
-    />
+      <canvas #myCanvas></canvas>
+      <div>
+        <img
+          #myImg
+          src="https://github.com/petrkgn/katamino-game-angular/blob/main/wshape.png?raw=true" />
+      </div>
+    </div>
   `,
   styles: `
     img {
@@ -57,17 +61,23 @@ import { tap } from 'rxjs';
 })
 export class PlacementShapesComponent implements AfterViewInit {
   private readonly resizeService = inject(ResizeService);
-  placementShapes: InputSignal<Entity[] | null> = input.required();
-  private imgWidth = 96;
-  private imgHeight = 96;
   private readonly window = inject(WINDOW);
-  private canvas!: HTMLCanvasElement;
-  private ctx!: CanvasRenderingContext2D | null;
+  private readonly gameFacade = inject(GameFacade);
 
   @ViewChild('myCanvas', { static: true })
   private readonly _canvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('myImg', { static: true })
   private readonly img!: ElementRef;
+
+  private imgWidth = 96;
+  private imgHeight = 96;
+
+  private canvas!: HTMLCanvasElement;
+  private ctx!: CanvasRenderingContext2D | null;
+
+  placementShapes = toSignal(this.gameFacade.selectPlacementShapes(), {
+    initialValue: [],
+  });
 
   constructor() {
     effect((): any => {
@@ -104,7 +114,7 @@ export class PlacementShapesComponent implements AfterViewInit {
   //   const deltaY = newCoordinatesA.y - objA.y;
 
   //   // Создаем новый объект для objB с обновленными координатами, сохраняя относительное положение
-  //   const updatedObjB = { 
+  //   const updatedObjB = {
   //     x: objB.x + deltaX,
   //     y: objB.y + deltaY,
   //   };
@@ -120,7 +130,7 @@ export class PlacementShapesComponent implements AfterViewInit {
   }
 
   render(placementShapes: Entity[]): void {
-    if (!placementShapes.length && this.ctx) {
+    if (!placementShapes?.length && this.ctx) {
       this.ctx.clearRect(0, 0, this.window.innerWidth, this.window.innerHeight);
       return;
     }
@@ -153,10 +163,10 @@ export class PlacementShapesComponent implements AfterViewInit {
           this.window.innerHeight
         );
         this.ctx.save();
-        // this.ctx.beginPath();
-        // this.ctx.translate(positionX, positionY);
-        // this.ctx.rotate((Math.PI / 180) * angle);
-        // this.ctx.translate(-positionX, -positionY);
+        this.ctx.beginPath();
+        this.ctx.translate(positionX, positionY);
+        this.ctx.rotate((Math.PI / 180) * angle);
+        this.ctx.translate(-positionX, -positionY);
         this.ctx.drawImage(
           shape,
           positionX - this.imgWidth / 2,

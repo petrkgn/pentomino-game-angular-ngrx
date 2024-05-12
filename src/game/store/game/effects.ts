@@ -2,7 +2,7 @@ import { Inject, inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { distinctUntilChanged, filter, map, Observable, tap } from 'rxjs';
 
-import { GameActions, PlayerActions } from './game.actions';
+import { GameActions, PlayerActions } from './actions';
 import { KEY_PRESSED } from '../../tokens/key-pressed.token';
 import { MOUSE_MOVE } from '../../tokens/mouse-event.token';
 import { ResizeService } from '../../services/resize.service';
@@ -32,13 +32,13 @@ export class GameEffects {
   });
 
   readonly resizeWindow$ = createEffect(() => {
-    return this.resizeService.calculateScaleRatio(20, 20).pipe(
+    return this.resizeService.calculateScaleRatio(32, 20).pipe(
       distinctUntilChanged(),
       map((e) => GameActions.ratioChanged({ ratio: Math.ceil(e) }))
     );
   });
 
-  readonly keyEvent$ = createEffect(() =>
+  readonly rotateShape$ = createEffect(() =>
     this.keyPressed$.pipe(
       filter((e) => e === 'Space'),
       map((e) => {
@@ -48,7 +48,7 @@ export class GameEffects {
           this.currentAngle += 90;
         }
 
-        return PlayerActions.keyDown({ angle: this.currentAngle });
+        return PlayerActions.rotateShape({ angle: this.currentAngle });
       })
     )
   );

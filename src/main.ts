@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, NgZone, ɵNoopNgZone } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import 'zone.js';
 import { provideState, provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { GameComponent } from './game/game.component';
-import { GameFeature } from './game/store/game/game.reducer';
-import { GameEffects } from './game/store/game/game.effects';
+// import { GameFeature } from './game/store/game/reducer';
+import { GameEffects } from './game/store/game/effects';
+import { gameFeature } from './game/store/game/state';
 
 @Component({
   selector: 'app-root',
@@ -22,8 +23,9 @@ export class App {
 
 bootstrapApplication(App, {
     providers: [
+      {provide: NgZone, useClass: ɵNoopNgZone},
       provideStore(), 
-      provideState(GameFeature),
+      provideState(gameFeature),
       provideEffects([GameEffects])
     ]
 });

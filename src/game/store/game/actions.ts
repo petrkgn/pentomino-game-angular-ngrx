@@ -11,10 +11,14 @@ export const PentominoActions = createActionGroup({
     addEntity: props<{ entity: Entity }>(),
     updateEntity: props<{ id: EntityId; changes: Partial<Entity> }>(),
     deleteEntity: props<{ id: EntityId }>(),
-    addComponentToEntity:
-      props<{ entityId: EntityId; component: EntityComponents }>(),
-    removeComponentFromEntity:
-      props<{ entityId: EntityId; currentComponent: ComponentType }>(),
+    addComponentToEntity: props<{
+      entityId: EntityId;
+      component: EntityComponents;
+    }>(),
+    removeComponentFromEntity: props<{
+      entityId: EntityId;
+      currentComponent: ComponentType;
+    }>(),
     updateComponentData: props<{
       entityId: EntityId;
       currentComponent: ComponentType;
@@ -27,7 +31,7 @@ export const PlayerActions = createActionGroup({
   source: 'Control',
   events: {
     mouseMove: props<{ mx: number; my: number }>(),
-    keyDown: props<{ angle: number }>(),
+    rotateShape: props<{ angle: number }>(),
   },
 });
 
